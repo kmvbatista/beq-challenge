@@ -4,6 +4,8 @@ import "react-toastify/dist/ReactToastify.css";
 
 const API_URL = "http://localhost:8080";
 
+const userId = 'user10'
+
 function App() {
   const [data, setData] = useState<string>();
   const [isDataValid, setIsDataValid] = useState<boolean>(true);
@@ -15,7 +17,7 @@ function App() {
   }, []);
 
   const getData = async () => {
-    const response = await fetch(API_URL);
+    const response = await fetch(API_URL, {headers: {userId}});
     const { data } = await response.json();
     setData(data);
   };
@@ -28,6 +30,7 @@ function App() {
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        userId
       },
     });
     if(response.ok) {
@@ -43,6 +46,7 @@ function App() {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          userId
         },
       })
       const responseData = await response.json();
@@ -57,7 +61,7 @@ function App() {
   };
 
   const recoverData = async () => {
-      const response = await fetch(API_URL+'/recover');
+      const response = await fetch(API_URL+'/recover', {headers: {userId}});
       const recoverData = await response.json();
       if(response.ok) {
         setData(recoverData);

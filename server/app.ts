@@ -14,15 +14,19 @@ const dataBackup = new DataBackup(backupDir);
 app.use(cors());
 app.use(express.json());
 
+function getUserId(request: any) : string {
+  return request.headers.userId
+}
+
 // Routes
 
 app.get("/", (req, res) => {
-  const data  = dataStorage.getData('any')
+  const data  = dataStorage.getData(getUserId(req))
   res.json({data});
 });
 
 app.get("/recover", async (req, res) => {
-  const latestVersion = dataVersioning.getLatestVersion('any')
+  const latestVersion = dataVersioning.getLatestVersion(getUserId(req))
   if(latestVersion) {
     const recoveredData = await dataBackup.restoreData(latestVersion)
     return res.json(recoveredData);
@@ -32,17 +36,17 @@ app.get("/recover", async (req, res) => {
 
 app.post("/", (req, res) => {
   const newData = req.body.data || '';
-  dataStorage.storeData('any', newData)
-  const newVersion = dataVersioning.saveVersion('any')
+  dataStorage.storeData(getUserId(req), newData)
+  const newVersion = dataVersioning.saveVersion(getUserId(req))
   dataBackup.backupData(newData, newVersion)
   res.sendStatus(200);
 });
 
 app.post("/verify", (req, res) => {
   const data = req.body.data || '';
-  const latestVersion = dataVersioning.getLatestVersion('any')
+  const latestVersion = dataVersioning.getLatestVersion(getUserId(req))
   if(latestVersion) {
-    const isDataValid = dataStorage.verifyData('any', data)
+    const isDataValid = dataStorage.verifyData(getUserId(req), data)
     if(isDataValid) {
       return res.json({message: 'Data is valid'})
     }
